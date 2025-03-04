@@ -9,6 +9,7 @@ import limiter from '../src/middlewares/validar-cant-peticiones.js'
 import authRoutes from '../src/auth/auth.routes.js';
 import authUsers from '../src/users/user.routes.js';
 import categoriaRoutes from "../src/categoria/categoria.routes.js"
+import productoRoustes from '../src/productos/producto.routes.js';
 
 const configurarMiddlewares = (app) => {
     app.use(express.urlencoded({extended: false}));
@@ -23,6 +24,7 @@ const configurarRutas = (app) =>{
     app.use("/Online/v1/auth", authRoutes);
     app.use("/Online/v1/users",authUsers);
     app.use("/Online/v1/categoria", categoriaRoutes);
+    app.use("/Online/v1/producto", productoRoustes);
 }
 
 const conectarDB = async () => {
