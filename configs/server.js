@@ -5,6 +5,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { dbConnection } from './mongo.js';
+import limiter from '../src/middlewares/validar-cant-peticiones.js'
+import authRoutes from '../src/auth/auth.routes.js';
+import authUsers from '../src/users/user.routes.js';
 
 const configurarMiddlewares = (app) => {
     app.use(express.urlencoded({extended: false}));
@@ -12,6 +15,12 @@ const configurarMiddlewares = (app) => {
     app.use(express.json());
     app.use(helmet());
     app.use(morgan('dev'));
+    app.use(limiter);
+}
+
+const configurarRutas = (app) =>{
+    app.use("/Online/v1/auth", authRoutes);
+    app.use("/Online/v1/users",authUsers);
 }
 
 const conectarDB = async () => {
@@ -29,6 +38,7 @@ export const iniciarServidor = async () => {
 
     await conectarDB();
     configurarMiddlewares(app);
+    configurarRutas(app);
 
     app.listen(port, () => {
         console.log(`Server Running On Port ${port}`);
