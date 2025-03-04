@@ -1,6 +1,5 @@
 import Productos from "../productos/producto.model.js";
 import Categoria from "../categoria/categoria.model.js";
-import User from "../users/user.model.js";
 
 export const crearProductos = async (req, res) => {
     try {
@@ -22,7 +21,7 @@ export const crearProductos = async (req, res) => {
             });
         }
 
-        const product = new Productos({
+        const producto = new Productos({
             name,
             description,
             precio,
@@ -31,12 +30,12 @@ export const crearProductos = async (req, res) => {
             status: true
         });
 
-        await product.save();
+        await producto.save();
 
         res.status(200).json({
             success: true,
-            message: "Producto Creado :D",
-            product
+            message: "Producto Creado (happy happy):D",
+            producto
         });
     } catch (error) {
         console.error(error);
