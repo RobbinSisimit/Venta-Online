@@ -74,20 +74,20 @@ export const updateUser = async (req, res = response) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                msg: "Usuario no encontrado"
+                msg: "Usuario no encontrado :("
             });
         }
 
         res.status(200).json({
             success: true,
-            msg: "Usuario Actualizado!",
+            msg: "Usuario Actualizado :)",
             user
         });
 
     } catch (error) {
         res.status(500).json({
             success: false,
-            msg: "Error Al Actualizar Usuario",
+            msg: "Error Al Actualizar Usuario bobo",
             error
         });
     }
@@ -110,19 +110,19 @@ export const deleteUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                msg: 'Usuario no encontrado'
+                msg: 'Usuario no encontrado :(no existes :())'
             });
         }
 
         res.status(200).json({
             success: true,
-            msg: 'Usuario desactivado',
+            msg: 'Usuario desactivado :(',
             user
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            msg: 'Error al Desactivar El Usuario',
+            msg: 'Error al Desactivar El Usuario bobin',
             error
         });
     }

@@ -55,3 +55,49 @@ export const actulizarCategoria = async (req, res) =>{
         });
     }
 };
+
+export const deleteCategory = async (req,res) => {
+    try {
+        const {id} = req.params
+        const categoria = await Categoria.findById(id)
+
+        if (!categoria) {
+            return res.status(404).json({
+                ss:false,
+                message: "Category not found"
+            })
+        }
+
+        // Buscar la categoria por defecto
+        const defaultCategory = await Categoria.findOne({name:'Productos Sin Categoria'})
+        if (!defaultCategory) {
+            return res.status(404).json({
+                message: "No hay categoria por defecto para asignarle los pobrecitos productos"
+            })
+        }
+
+        // Buscar los productos de la categoría eliminada
+        const productosHuerfanos = await Product.find({category: id})
+
+        // Mover a los productos huérfanos
+        await Product.updateMany({ category:id }, {category: defaultCategory._id})
+
+        //Agregar los productos al array de la categoria por defecto
+        defaultCategory.products.push(...productosHuerfanos.map(product => product._id))
+        defaultCategory.markModified('products');
+        await defaultCategory.save()
+
+        const deletedCategory = await Category.findByIdAndUpdate(id,{estado:false},{new:true})
+
+        res.status(200).json({
+            message: "Category deleted successfully",
+            deletedCategory
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Error deleting category boludin",
+            error: error.message
+        })
+    }
+}

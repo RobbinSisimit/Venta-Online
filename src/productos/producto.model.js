@@ -40,4 +40,4 @@ ProductSchema.methods.toJSON = function() {
     return product
 }
 
-export default model('Product',ProductSchema)
+export default model('Product', ProductSchema);

@@ -1,4 +1,5 @@
 import Productos from "../productos/producto.model.js";
+import mongoose from "mongoose";
 import Categoria from "../categoria/categoria.model.js";
 
 export const crearProductos = async (req, res) => {
@@ -68,8 +69,73 @@ export const listarProductos = async (req,res) => {
         })
     } catch (error) {
         res.status(500).json({
-            message: "Error getting products",
-            error: error.message
+            message: "Error al listar productos",
+            error
         })
     }
 }
+
+export const actulizarProductos = async (req, res) => {
+    try{
+        const {id} = req.params
+        const {...data} = req.body
+
+        const productoActualizado  = await Productos.findByIdAndUpdate(id,data,{new:true})
+
+        if (!productoActualizado ) {
+            return res.status(404).json({
+                success: false,
+                message: "Producto no encontrado."
+            });
+        }
+
+        res.status(200).json({
+            success:true,
+            msg:'Actualice el producto oiste.....',
+            productoActualizado 
+        })
+
+    }catch(error){
+        res.status(500).json({
+            msg:"error al actulizar bobo",
+            error
+        })
+    }
+}
+
+export const eliminarProducto = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verificar si el ID es válido antes de buscar el producto
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "El ID proporcionado no es válido."
+            });
+        }
+
+        // Buscar el producto antes de eliminarlo
+        const producto = await Productos.findById(id);
+        if (!producto) {
+            return res.status(404).json({
+                success: false,
+                message: "Producto no encontrado."
+            });
+        }
+
+        await Productos.findByIdAndDelete(id);
+
+        res.status(200).json({
+            success: true,
+            message: "Producto eliminado correctamente."
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error al eliminar el producto.",
+            error: error.message
+        });
+    }
+};
