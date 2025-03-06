@@ -8,9 +8,10 @@ import { dbConnection } from './mongo.js';
 import limiter from '../src/middlewares/validar-cant-peticiones.js'
 import authRoutes from '../src/auth/auth.routes.js';
 import authUsers from '../src/users/user.routes.js';
-import categoriaRoutes from "../src/categoria/categoria.routes.js"
+import categoriaRoutes from "../src/categoria/categoria.routes.js";
 import productoRoustes from '../src/productos/producto.routes.js';
-import carritoRoutes from '../src/carritoCompras/carritoCompras.routes.js'
+import carritoRoutes from '../src/carritoCompras/carritoCompras.routes.js';
+import facturaRoutes from '../src/factura/factura.routes.js';
 
 const configurarMiddlewares = (app) => {
     app.use(express.urlencoded({extended: false}));
@@ -27,6 +28,7 @@ const configurarRutas = (app) =>{
     app.use("/Online/v1/categoria", categoriaRoutes);
     app.use("/Online/v1/producto", productoRoustes);
     app.use("/Online/v1/carrito", carritoRoutes);
+    app.use("/Online/v1/factura", facturaRoutes);
 }
 
 const conectarDB = async () => {
