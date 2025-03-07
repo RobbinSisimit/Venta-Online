@@ -1,14 +1,22 @@
 import { Router } from "express";
-import { confirmarCompra, cancelarCompra } from './factura.controller.js'; // Importamos las funciones
+import { confirmarCompra, cancelarCompra } from './factura.controller.js';
+import { validarJWT } from "../middlewares/validar-jwt.js";
 
 const router = Router();
 
-// Ruta para confirmar la compra
-// Utilizamos el método POST porque queremos crear una nueva factura confirmada
-router.post('/', confirmarCompra);
+router.post('/',
+    [
+        validarJWT
+    ] 
+    ,confirmarCompra
+);
 
-// Ruta para cancelar la compra
-// Utilizamos el método PUT para modificar el estado de la factura
-router.put('/cancelarCompra/:facturaID', cancelarCompra);
+
+router.put('/cancelarCompra/:facturaID',
+    [
+        validarJWT
+    ], 
+    cancelarCompra
+);
 
 export default router;

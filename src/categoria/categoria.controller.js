@@ -1,4 +1,5 @@
 import Categoria from '../categoria/categoria.model.js';
+import Productos  from '../productos/producto.model.js'
 
 export const crearCategoria = async (req, res) =>{
     try{
@@ -56,48 +57,50 @@ export const actulizarCategoria = async (req, res) =>{
     }
 };
 
-export const deleteCategory = async (req,res) => {
+
+
+export const EliminarCategoira = async (req,res) => {
     try {
-        const {id} = req.params
-        const categoria = await Categoria.findById(id)
+        const { id } = req.params;
+        const categoria = await Categoria.findById(id);
 
         if (!categoria) {
-            return res.status(404).json({
-                ss:false,
+            return res.status(400).json({
+                success: false,
                 message: "Category not found"
-            })
+            });
         }
 
-        // Buscar la categoria por defecto
-        const defaultCategory = await Categoria.findOne({name:'Productos Sin Categoria'})
+
+        const defaultCategory = await Categoria.findOne({ name: 'General' });
         if (!defaultCategory) {
             return res.status(404).json({
-                message: "No hay categoria por defecto para asignarle los pobrecitos productos"
-            })
+                message: "No hay categoría por defecto para asignarle los productos"
+            });
         }
 
-        // Buscar los productos de la categoría eliminada
-        const productosHuerfanos = await Product.find({category: id})
 
-        // Mover a los productos huérfanos
-        await Product.updateMany({ category:id }, {category: defaultCategory._id})
+        const productosSinCategoria = await Productos.find({ categoria: id });
 
-        //Agregar los productos al array de la categoria por defecto
-        defaultCategory.products.push(...productosHuerfanos.map(product => product._id))
+
+        await Productos.updateMany({ categoria: id }, { categoria: defaultCategory._id });
+
+
+        defaultCategory.products.push(...productosSinCategoria.map(producto => producto._id));
         defaultCategory.markModified('products');
-        await defaultCategory.save()
+        await defaultCategory.save();
 
-        const deletedCategory = await Category.findByIdAndUpdate(id,{estado:false},{new:true})
+        const deletedCategory = await Categoria.findByIdAndDelete(id);
 
         res.status(200).json({
             message: "Category deleted successfully",
             deletedCategory
-        })
+        });
 
     } catch (error) {
         res.status(500).json({
-            message: "Error deleting category boludin",
+            message: "Error al eliminar categoria",
             error: error.message
-        })
+        });
     }
 }

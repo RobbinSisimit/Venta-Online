@@ -2,11 +2,24 @@ import { Router } from "express";
 import { check } from "express-validator";
 import { validarCampos } from "../middlewares/validar-campos.js";
 import { validarJWT } from "../middlewares/validar-jwt.js";
-import { crearProductos, listarProductos, actulizarProductos, eliminarProducto } from "./producto.controller.js";
+import { crearProductos, listarProductos, actulizarProductos, eliminarProducto, listarProductosAgotados, listarProductosMasVendidos, listarProductosPorCategoria } from "./producto.controller.js";
 import { validarRol } from "../middlewares/validar-roles.js";
 
 const router = Router();
 router.get('/', listarProductos);
+
+router.get("/agatodos",
+    [validarRol("ADMIN_ROLE")],
+    listarProductosAgotados);
+
+router.get("/Masvendidos", listarProductosMasVendidos);
+
+router.get("/categoria/:categoriaId", 
+    [
+        validarJWT,  
+        validarCampos
+    ], 
+    listarProductosPorCategoria);
 
 router.post('/', 
     [

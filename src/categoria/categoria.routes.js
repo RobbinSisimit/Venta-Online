@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { crearCategoria, listarCategoria, actulizarCategoria } from "../categoria/categoria.controller.js";
+import { crearCategoria, listarCategoria, actulizarCategoria, EliminarCategoira } from "../categoria/categoria.controller.js";
 import { validarJWT } from "../middlewares/validar-jwt.js";
 import { validarRol } from "../middlewares/validar-roles.js";
 
@@ -26,6 +26,15 @@ router.put(
         validarRol("ADMIN_ROLE")
     ],
     actulizarCategoria
+)
+
+router.delete(
+    "/:id/",
+    [
+        validarJWT,
+        validarRol("ADMIN_ROLE")
+    ],
+    EliminarCategoira
 )
 
 export default router;

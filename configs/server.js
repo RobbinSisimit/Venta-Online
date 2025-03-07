@@ -13,6 +13,8 @@ import productoRoustes from '../src/productos/producto.routes.js';
 import carritoRoutes from '../src/carritoCompras/carritoCompras.routes.js';
 import facturaRoutes from '../src/factura/factura.routes.js';
 
+import Category from '../src/categoria/categoria.model.js';
+
 const configurarMiddlewares = (app) => {
     app.use(express.urlencoded({extended: false}));
     app.use(cors());
@@ -35,10 +37,31 @@ const conectarDB = async () => {
     try {
         await dbConnection();
         console.log("Conexion Exitosa Con La Base De Datos");
+        await categoriaGeneral();
     } catch (error) {
         console.log("Error Al Conectar Con La Base De Datos", error);
     }
 }
+
+export const categoriaGeneral = async () => {
+    try {
+        const defaultCategory = await Category.findOne({name:"General"})
+
+        if (!defaultCategory) {
+            const category = await Category.create({
+                name: "General"
+            })
+            await category.save()
+        }else{
+            console.log("Categoria por defecto creada")
+        }
+
+
+    } catch (error) {
+        console.log('No pudimos crear la categoria baluk.')
+    }
+}
+
 
 export const iniciarServidor = async () => {
     const app = express();

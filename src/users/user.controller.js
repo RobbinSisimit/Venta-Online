@@ -56,20 +56,32 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res = response) => {
     try {
         const { id } = req.params;
-        const { password, ...data } = req.body;
+        const { password, role, ...data } = req.body;
 
-        if (req.usuario.role === "USER_ROLE" && id !== req.usuario._id.toString()) {
-            return res.status(403).json({
-                success: false,
-                msg: "No está autorizado para actualizar la información de otro usuario"
-            });
+         // Si se proporciona un nuevo rol
+         if (role) {
+            // Si el rol es 'USER_ROLE' no debería haber restricciones
+            if (role === "USER_ROLE") {
+                data.role = "USER_ROLE";
+            } 
+            // Si el rol es 'ADMIN_ROLE' y el usuario actual es ADMIN, le damos permiso
+            else if (role === "ADMIN_ROLE" && req.usuario.role === "ADMIN_ROLE") {
+                data.role = "ADMIN_ROLE";
+            } else {
+                return res.status(403).json({
+                    success: false,
+                    msg: "No tienes permisos para cambiar el rol a ADMIN_ROLE"
+                });
+            }
         }
+
 
         if (password) {
             data.password = await hash(password);
         }
 
         const user = await User.findByIdAndUpdate(id, data, { new: true });
+
 
         if (!user) {
             return res.status(404).json({
@@ -78,6 +90,7 @@ export const updateUser = async (req, res = response) => {
             });
         }
 
+
         res.status(200).json({
             success: true,
             msg: "Usuario Actualizado :)",
@@ -85,10 +98,11 @@ export const updateUser = async (req, res = response) => {
         });
 
     } catch (error) {
+
         res.status(500).json({
             success: false,
             msg: "Error Al Actualizar Usuario bobo",
-            error
+            error: error.message
         });
     }
 };
