@@ -110,34 +110,45 @@ export const updateUser = async (req, res = response) => {
 
 export const deleteUser = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id } = req.params; // Obtenemos el ID del usuario a eliminar desde los parámetros de la URL
+        const userId = req.usuario._id; // ID del usuario autenticado
 
-        if (req.usuario.role !== "ADMIN_ROLE") {
+        // Verificar si el usuario que hace la solicitud está tratando de eliminar su propia cuenta o si es un ADMIN
+        if (userId.toString() !== id && req.usuario.role !== "ADMIN_ROLE") {
             return res.status(403).json({
                 success: false,
-                msg: "No está autorizado para eliminar a otros usuarios"
+                msg: "No está autorizado para eliminar esta cuenta"
             });
         }
 
-        const user = await User.findByIdAndUpdate(id, { estado: false }, { new: true });
+        // Verificar si el usuario ha confirmado la eliminación
+        const { confirm } = req.body;
+        if (!confirm) {
+            return res.status(400).json({
+                success: false,
+                msg: "La confirmación de eliminación es requerida."
+            });
+        }
+
+        // Si la confirmación es verdadera, procedemos con la eliminación
+        const user = await User.findByIdAndDelete(id);
 
         if (!user) {
             return res.status(404).json({
                 success: false,
-                msg: 'Usuario no encontrado :(no existes :())'
+                msg: "Usuario no encontrado"
             });
         }
 
         res.status(200).json({
             success: true,
-            msg: 'Usuario desactivado :(',
-            user
+            msg: "Cuenta eliminada con éxito"
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            msg: 'Error al Desactivar El Usuario bobin',
-            error
+            msg: "Error al eliminar la cuenta",
+            error: error.message
         });
     }
 };

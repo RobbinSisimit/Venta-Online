@@ -1,11 +1,13 @@
 import Carrito from "./carritoCompras.model.js";
 import Producto  from "../productos/producto.model.js";
 
+
+
 export const addToCar = async (req, res) => {
   try {
-    const { user, productID, cantidad } = req.body; // ID del producto y cantidad
+    const { user, productID, cantidad } = req.body;
 
-    // Validar que la cantidad es un número y mayor que 0
+    // Validación de cantidad
     if (!cantidad || isNaN(cantidad) || cantidad <= 0) {
       return res.status(400).json({
         message: "Cantidad inválida, debe ser un número mayor que 0."
@@ -19,61 +21,45 @@ export const addToCar = async (req, res) => {
       });
     }
 
-    // Validar que el precio del producto es un número y mayor que 0
-    if (isNaN(product.precio) || product.precio <= 0) {
-      return res.status(400).json({
-        message: "El precio del producto es inválido."
-      });
-    }
-
-    // Calcular el subtotal del producto
-    const subtotal = Number(product.precio) * Number(cantidad);
-
-    // Validar que el subtotal sea un número y mayor que 0
-    if (isNaN(subtotal) || subtotal <= 0) {
-      return res.status(400).json({
-        message: "El cálculo del subtotal no es válido."
-      });
-    }
+    const subtotalProducto = Number(product.precio) * Number(cantidad);
 
     // Buscar si el usuario ya tiene un carrito
     let car = await Carrito.findOne({ user });
 
     if (!car) {
-      // Si el usuario no tiene carrito, se le crea uno con el primer producto
+      // Crear carrito si no existe
       car = await Carrito.create({
         user,
         products: [{
           product: product._id,
           cantidad,
           precio: product.precio,
-          subtotal // Agregar el subtotal calculado aquí
+          subtotal: subtotalProducto
         }],
-        // El total es la suma de los subtotales de los productos
-        total: subtotal, // Total inicial con el primer producto
-        subtotal // El subtotal del carrito también se inicializa aquí
+        subtotal: subtotalProducto,
+        total: subtotalProducto
       });
     } else {
-      // Si ya tiene carrito, verifica si el producto ya está en el carrito
+      // Verificar si el producto ya está en el carrito
       const existingProduct = car.products.find(p => p.product.toString() === productID);
 
       if (existingProduct) {
-        // Si el producto ya está, suma la cantidad y recalcula el subtotal
+        // Si el producto ya está, sumamos la cantidad y recalculamos el subtotal
         existingProduct.cantidad += cantidad;
-        existingProduct.subtotal = Number(existingProduct.cantidad) * Number(existingProduct.precio);
+        existingProduct.subtotal = existingProduct.cantidad * existingProduct.precio;
       } else {
-        // Si no está, se agrega al array de productos con el subtotal
+        // Si no está, lo agregamos al carrito
         car.products.push({
           product: product._id,
           cantidad,
           precio: product.precio,
-          subtotal // Agregar el subtotal calculado aquí
+          subtotal: subtotalProducto
         });
       }
 
-      // Recalcular el total y el subtotal del carrito
-      car.total = car.products.reduce((acc, item) => acc + (Number(item.subtotal) || 0), 0);
-      car.subtotal = car.products.reduce((acc, item) => acc + (Number(item.subtotal) || 0), 0);
+      // Recalcular el subtotal y el total del carrito
+      car.subtotal = car.products.reduce((acc, item) => acc + (item.subtotal || 0), 0);
+      car.total = car.subtotal; // Puedes calcular un total diferente si lo deseas (descuentos, impuestos, etc.)
     }
 
     // Guardar los cambios en el carrito
@@ -82,9 +68,11 @@ export const addToCar = async (req, res) => {
     // **Populate user y productos**
     car = await Carrito.findOne({ user })
       .populate("user", "name email")
-      .populate("products.product");
+      .populate({
+        path: "products.product",
+        strictPopulate: false
+      });
 
-    // Convertir a objeto plano de JS para incluir los campos virtuales
     const carObject = car.toObject({ virtuals: true });
 
     res.status(200).json({
@@ -92,14 +80,13 @@ export const addToCar = async (req, res) => {
       car: carObject
     });
   } catch (error) {
-    console.error(error); // Para depuración
+    console.error(error);
     res.status(500).json({
       message: "Error al agregar al carrito.",
       error: error.message
     });
   }
 };
-
 
 export const getCar = async (req, res) => {
   try {

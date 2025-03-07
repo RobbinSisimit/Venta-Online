@@ -41,7 +41,6 @@ router.delete(
         validarJWT,
         check("id", "No es un ID Valido").isMongoId(),
         check("id").custom(existeUsuarioById),
-        validarRol("ADMIN_ROLE"),
         validarCampos
     ],
     deleteUser

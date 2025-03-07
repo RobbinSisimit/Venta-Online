@@ -6,7 +6,7 @@ const facturaSchema = new mongoose.Schema({
     ref: 'User', // Referencia al usuario que hace la compra
     required: true
   },
-  productos: [{
+  productos: [{  // Asegúrate de usar "productos" en plural
     product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Product', // Referencia al producto
